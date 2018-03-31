@@ -1,4 +1,4 @@
-# Deploy Away
+# Deploy Away (WIP)
 
 A project involving DeployHQ, a Raspberry Pi, and a big red button.
 
