@@ -1,0 +1,28 @@
+{
+    "name": "nessworthy/deploy-away",
+    "authors": [
+        {
+            "name": "Sean Nessworthy",
+            "email": "sean@nessworthy.me"
+        }
+    ],
+    "require": {
+        "roave/security-advisories": "dev-master",
+        "calcinai/phpi": "^0.3.2",
+        "vlucas/phpdotenv": "^2.4",
+        "amphp/amp": "^2.0",
+        "amphp/artax": "^3.0",
+        "amphp/react-adapter": "^1.1",
+        "room11/dom-utils": "^1.1",
+        "monolog/monolog": "^1.23",
+        "rdlowrey/auryn": "^1.4"
+    },
+    "autoload": {
+        "psr-4": {
+            "Nessworthy\\Button\\":"src/"
+        }
+    },
+    "require-dev": {
+        "ramsey/uuid": "^3.7"
+    }
+}
