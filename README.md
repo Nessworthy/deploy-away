@@ -66,12 +66,14 @@ The following should be set up as environment variables, or present in a `.env` 
 * `RGB_LED_PIN_1_RED` - The GPIO pin ID for the first LED controlling red.
 * `RGB_LED_PIN_1_GREEN` - The GPIO pin ID for the first LED controlling green.
 * `RGB_LED_PIN_1_BLUE` - The GPIO pin ID for the first LED controlling blue.
-* `RGB_LED_PIN_2_RED=` - The GPIO pin ID for the second LED controlling red.
+* `RGB_LED_PIN_2_RED` - The GPIO pin ID for the second LED controlling red.
 * `RGB_LED_PIN_2_GREEN` - The GPIO pin ID for the second LED controlling green.
 * `RGB_LED_PIN_2_BLUE` - The GPIO pin ID for the second LED controlling red.
 * `RGB_LED_PIN_3_RED` - The GPIO pin ID for the third LED controlling red.
 * `RGB_LED_PIN_3_GREEN` - The GPIO pin ID for the third LED controlling green.
 * `RGB_LED_PIN_3_BLUE` - The GPIO pin ID for the third LED controlling blue.
+* `BUTTON_OUTPUT_PIN` - The GPIO pin ID for the big-ass button output.
+* `BUTTON_LED_PIN` - The GPIO pin ID for the big-ass button LED output.
 
 ## Run
 
