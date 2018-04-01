@@ -2,7 +2,7 @@
 require_once __DIR__ . '/../vendor/autoload.php';
 require_once __DIR__ . '/../src/auryn.php';
 
-$dotEnv = new Dotenv\Dotenv(__DIR__);
+$dotEnv = new Dotenv\Dotenv(__DIR__ . '/..');
 $dotEnv->load();
 
 $injector = new Auryn\Injector();

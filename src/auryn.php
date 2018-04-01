@@ -23,6 +23,8 @@ function auryn_setup_dependencies(\Auryn\Injector $injector, array $config) {
 
     $injector->share($injector);
 
+    $injector->defineParam('config', $config);
+
     $injector->share(LoggerInterface::class);
     $injector->alias(LoggerInterface::class, Monolog\Logger::class);
     $injector->define(Monolog\Logger::class, [
@@ -41,8 +43,8 @@ function auryn_setup_dependencies(\Auryn\Injector $injector, array $config) {
     $injector->delegate(Board::class, ['\Calcinai\PHPi\Factory', 'create']);
 
     $injector->share(AsyncDeploymentStorage::class);
-    //$injector->alias(AsyncDeploymentStorage::class, \Nessworthy\Button\Deployment\MockAsyncDeploymentStorage::class);
-    $injector->alias(AsyncDeploymentStorage::class, \Nessworthy\Button\Deployment\DeployHQAsyncDeploymentStorage::class);
+    $injector->alias(AsyncDeploymentStorage::class, \Nessworthy\Button\Deployment\MockAsyncDeploymentStorage::class);
+    //$injector->alias(AsyncDeploymentStorage::class, \Nessworthy\Button\Deployment\DeployHQAsyncDeploymentStorage::class);
     $injector->define(DeployHQAsyncDeploymentStorage::class, [
         ':account' => $config['DEPLOY_ACCOUNT'],
         ':username' => $config['DEPLOY_USER'],
@@ -52,8 +54,8 @@ function auryn_setup_dependencies(\Auryn\Injector $injector, array $config) {
     ]);
 
     $injector->share(AsyncRepositoryStorage::class);
-    //$injector->alias(AsyncRepositoryStorage::class, \Nessworthy\Button\Repository\MockAsyncRepository::class);
-    $injector->alias(AsyncRepositoryStorage::class, \Nessworthy\Button\Repository\DeployHQAsyncRepositoryStorage::class);
+    $injector->alias(AsyncRepositoryStorage::class, \Nessworthy\Button\Repository\MockAsyncRepository::class);
+    //$injector->alias(AsyncRepositoryStorage::class, \Nessworthy\Button\Repository\DeployHQAsyncRepositoryStorage::class);
     $injector->define(DeployHQAsyncRepositoryStorage::class, [
         ':account' => $config['DEPLOY_ACCOUNT'],
         ':username' => $config['DEPLOY_USER'],
@@ -119,5 +121,21 @@ function auryn_setup_dependencies(\Auryn\Injector $injector, array $config) {
 
         $progressor = new \Nessworthy\Button\Progressor\PartProgressor(3, ...$progressorParts);
         return $progressor;
+    });
+
+    $injector->delegate(\Nessworthy\Button\Button\AmpButton::class, function(BoardInterface $board, array $config) {
+        $pin = $board->getPin($config['BUTTON_OUTPUT_PIN']);
+        $pin->setFunction(\Calcinai\PHPi\Pin\PinFunction::OUTPUT);
+        $pin->high();
+        $button = new \Calcinai\PHPi\External\Generic\Button($pin);
+        return new \Nessworthy\Button\Button\AmpButton($button);
+    });
+
+    $injector->share(\Nessworthy\Button\LED\Simple::class);
+    $injector->alias(\Nessworthy\Button\LED\Simple::class, \Nessworthy\Button\LED\GpioSimple::class);
+    $injector->delegate(\Nessworthy\Button\LED\GpioSimple::class, function(BoardInterface $board, array $config) {
+        $pin = $board->getPin($config['BUTTON_LED_PIN']);
+        $led = new \Calcinai\PHPi\External\Generic\LED($pin);
+        return new \Nessworthy\Button\LED\GpioSimple($led);
     });
 }

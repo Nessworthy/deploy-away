@@ -44,15 +44,15 @@ class DeployManager {
         $this->progressIndicator = $progressIndicator;
     }
 
-    public function deploy()
+    public function deploy(string $branch)
     {
         $self = $this;
-        return \Amp\call(function() use ($self) {
-            return $self->handleDeploy();
+        return \Amp\call(function() use ($self, $branch) {
+            return $self->handleDeploy($branch);
         });
     }
 
-    private function handleDeploy()
+    private function handleDeploy(string $branch)
     {
         $this->logger->notice('Deployment Process Started!');
 
@@ -65,7 +65,7 @@ class DeployManager {
         $this->logger->info('Last Deployed Commit Ref: ' . $lastDeployedRef);
         $this->logger->debug('Fetching branch tip ref...');
 
-        $lastCommitReference = yield $this->repositoryStorage->getLastCommitReference($_ENV['DEPLOY_BRANCH']);
+        $lastCommitReference = yield $this->repositoryStorage->getLastCommitReference($branch);
 
         $this->logger->info('Last Commit in Branch Ref: ' . $lastCommitReference);
         $this->logger->debug('Creating deployment...');

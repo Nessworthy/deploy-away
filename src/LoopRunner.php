@@ -2,11 +2,12 @@
 
 namespace Nessworthy\Button;
 
-use Amp\Delayed;
+use Calcinai\PHPi\Board\BoardInterface;
+use Nessworthy\Button\Button\AmpButton;
 use Nessworthy\Button\Deployment\DeployManager;
+use Nessworthy\Button\LED\Simple;
 use Nessworthy\Button\Progressor\Progressor;
 use Psr\Log\LoggerInterface;
-use React\EventLoop\LoopInterface;
 
 class LoopRunner
 {
@@ -22,16 +23,39 @@ class LoopRunner
      * @var DeployManager
      */
     private $deployManager;
+    /**
+     * @var BoardInterface
+     */
+    private $board;
+    /**
+     * @var AmpButton
+     */
+    private $ampButton;
+    /**
+     * @var array
+     */
+    private $config;
+    /**
+     * @var Simple
+     */
+    private $buttonLed;
 
     public function __construct(
         LoggerInterface $logger,
-        LoopInterface $reactLoop,
         Progressor $progressIndicator,
-        DeployManager $deployManager
+        DeployManager $deployManager,
+        BoardInterface $board,
+        AmpButton $ampButton,
+        Simple $buttonLed,
+        array $config
     ) {
         $this->logger = $logger;
         $this->progressIndicator = $progressIndicator;
         $this->deployManager = $deployManager;
+        $this->board = $board;
+        $this->ampButton = $ampButton;
+        $this->config = $config;
+        $this->buttonLed = $buttonLed;
     }
 
     public function run()
@@ -39,14 +63,21 @@ class LoopRunner
         $this->logger->debug('Loop started!');
 
         try {
+            $deployManager = $this->deployManager;
+            $ampButton = $this->ampButton;
 
-            // Set up button.
+            while(true) {
 
-            yield new Delayed(500);
+                $this->buttonLed->on();
 
-            // Enable watching for button changes.
+                yield $ampButton->waitForPress();
 
-            yield $this->deployManager->deploy();
+                $this->buttonLed->off();
+
+                $this->logger->debug('Button Pressed!');
+
+                yield $deployManager->deploy($this->config['DEPLOY_BRANCH']);
+            }
 
         } catch (\Throwable $e) {
             $this->progressIndicator->errorAtCurrent();
