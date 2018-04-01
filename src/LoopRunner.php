@@ -2,7 +2,6 @@
 
 namespace Nessworthy\Button;
 
-use Calcinai\PHPi\Board\BoardInterface;
 use Nessworthy\Button\Button\AmpButton;
 use Nessworthy\Button\Deployment\DeployManager;
 use Nessworthy\Button\LED\Simple;
@@ -24,10 +23,6 @@ class LoopRunner
      */
     private $deployManager;
     /**
-     * @var BoardInterface
-     */
-    private $board;
-    /**
      * @var AmpButton
      */
     private $ampButton;
@@ -44,7 +39,6 @@ class LoopRunner
         LoggerInterface $logger,
         Progressor $progressIndicator,
         DeployManager $deployManager,
-        BoardInterface $board,
         AmpButton $ampButton,
         Simple $buttonLed,
         array $config
@@ -52,7 +46,6 @@ class LoopRunner
         $this->logger = $logger;
         $this->progressIndicator = $progressIndicator;
         $this->deployManager = $deployManager;
-        $this->board = $board;
         $this->ampButton = $ampButton;
         $this->config = $config;
         $this->buttonLed = $buttonLed;

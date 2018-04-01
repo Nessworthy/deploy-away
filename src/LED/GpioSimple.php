@@ -3,7 +3,6 @@
 namespace Nessworthy\Button\LED;
 
 use Calcinai\PHPi\External\Generic\LED;
-use Nessworthy\Button\LED\Simple;
 
 class GpioSimple implements Simple
 {

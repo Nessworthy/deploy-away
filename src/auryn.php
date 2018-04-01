@@ -36,11 +36,12 @@ function auryn_setup_dependencies(\Auryn\Injector $injector, array $config) {
     $injector->alias(Amp\Artax\Client::class, Amp\Artax\DefaultClient::class);
 
     $injector->share(LoopInterface::class);
-    $injector->delegate(LoopInterface::class, ['\Amp\ReactAdapter\ReactAdapter', 'get']);
+    $injector->delegate(LoopInterface::class, [\Amp\ReactAdapter\ReactAdapter::class, 'get']);
 
     $injector->share(BoardInterface::class);
+    $injector->share(Board::class);
     $injector->alias(BoardInterface::class, Board::class);
-    $injector->delegate(Board::class, ['\Calcinai\PHPi\Factory', 'create']);
+    $injector->delegate(Board::class, [\Calcinai\PHPi\Factory::class, 'create']);
 
     $injector->share(AsyncDeploymentStorage::class);
     $injector->alias(AsyncDeploymentStorage::class, \Nessworthy\Button\Deployment\MockAsyncDeploymentStorage::class);
@@ -79,7 +80,7 @@ function auryn_setup_dependencies(\Auryn\Injector $injector, array $config) {
         \Nessworthy\Button\Progressor\PartProgressor::class,
         function(
             \Auryn\Injector $injector,
-            BoardInterface $board,
+            Board $board,
             LoopInterface $loop
         ) use (
             $config
@@ -123,7 +124,7 @@ function auryn_setup_dependencies(\Auryn\Injector $injector, array $config) {
         return $progressor;
     });
 
-    $injector->delegate(\Nessworthy\Button\Button\AmpButton::class, function(BoardInterface $board, array $config) {
+    $injector->delegate(\Nessworthy\Button\Button\AmpButton::class, function(Board $board, array $config) {
         $pin = $board->getPin($config['BUTTON_OUTPUT_PIN']);
         $pin->setFunction(\Calcinai\PHPi\Pin\PinFunction::OUTPUT);
         $pin->high();
@@ -133,7 +134,7 @@ function auryn_setup_dependencies(\Auryn\Injector $injector, array $config) {
 
     $injector->share(\Nessworthy\Button\LED\Simple::class);
     $injector->alias(\Nessworthy\Button\LED\Simple::class, \Nessworthy\Button\LED\GpioSimple::class);
-    $injector->delegate(\Nessworthy\Button\LED\GpioSimple::class, function(BoardInterface $board, array $config) {
+    $injector->delegate(\Nessworthy\Button\LED\GpioSimple::class, function(Board $board, array $config) {
         $pin = $board->getPin($config['BUTTON_LED_PIN']);
         $led = new \Calcinai\PHPi\External\Generic\LED($pin);
         return new \Nessworthy\Button\LED\GpioSimple($led);

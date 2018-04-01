@@ -3,7 +3,6 @@ namespace Nessworthy\Button\Repository;
 
 use Amp\Artax\Client;
 use Amp\Artax\Request;
-use function Room11\DOMUtils\domdocument_load_html;
 
 class DeployHQAsyncRepositoryStorage implements AsyncRepositoryStorage
 {
