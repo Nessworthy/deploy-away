@@ -48,17 +48,16 @@ class MockAsyncDeploymentStorage implements  AsyncDeploymentStorage
 
     public function viewDeploymentStatus(string $deploymentUuid)
     {
-        $self = $this;
-        return \Amp\call(function() use ($self, $deploymentUuid) {
+        return \Amp\call(function() use ($deploymentUuid) {
             yield new Delayed(random_int(100, 500)); // Emulate network & processing.
 
             $currentTime = microtime(true) * 10000;
 
-            if (!isset($self->mockDeploys[$deploymentUuid])) {
+            if (!isset($this->mockDeploys[$deploymentUuid])) {
                 return new Failure(new \RuntimeException('Invalid deployment UUID.'));
             }
 
-            $deployment = $self->mockDeploys[$deploymentUuid];
+            $deployment = $this->mockDeploys[$deploymentUuid];
 
             return new DeploymentStatus(
                 $deployment['finishing'] < $currentTime ? DeploymentStatus::STATUS_COMPLETE : DeploymentStatus::STATUS_PENDING,
@@ -85,15 +84,13 @@ class MockAsyncDeploymentStorage implements  AsyncDeploymentStorage
             $onFinished
         );
 
-        $self = $this;
-
-        Loop::defer(function() use ($self, $deploymentUuid, $deploymentState) {
+        Loop::defer(function() use ($deploymentUuid, $deploymentState) {
 
             $completed = false;
             while ($completed === false) {
 
                 /** @var DeploymentStatus $status */
-                $status = yield $self->viewDeploymentStatus($deploymentUuid);
+                $status = yield $this->viewDeploymentStatus($deploymentUuid);
 
                 $this->logger->debug('Mock watch poll update.');
 

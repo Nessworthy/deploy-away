@@ -51,89 +51,46 @@ class DeployHQAsyncDeploymentStorage implements AsyncDeploymentStorage
         $this->serverUuid = $serverUuid;
     }
 
-    private function sendLastDeployedRefRequest()
-    {
-        $request = new Request(
-            sprintf(
-                'https://%s.deployhq.com/projects/%s/deployments?page=1&to=%s',
-                $this->account,
-                $this->project,
-                urlencode($this->serverUuid)
-            ),
-            'GET'
-        );
-
-        $request = $request->withHeader('Accept', 'application/json')
-            ->withHeader('Content-type', 'application/json')
-            ->withHeader('Authorization', 'Basic ' . base64_encode($this->username . ':' . $this->apiKey));
-
-        /** @var \Amp\Artax\Response $response */
-        $response = yield $this->httpClient->request($request);
-
-        $data = json_decode(yield $response->getBody(), true);
-
-        foreach ($data['records'] as $record) {
-            if (!empty($record['end_revision']['ref'])) {
-                return $record['end_revision']['ref'];
-            }
-        }
-        throw new \Exception('Could not determine last revision reference.');
-    }
-
     public function getLastDeployedRef()
     {
-        $self = $this;
-        return \Amp\call(function() use ($self) {
-            return $self->sendLastDeployedRefRequest();
+        return \Amp\call(function() {
+            $request = new Request(
+                sprintf(
+                    'https://%s.deployhq.com/projects/%s/deployments?page=1&to=%s',
+                    $this->account,
+                    $this->project,
+                    urlencode($this->serverUuid)
+                ),
+                'GET'
+            );
+
+            $request = $request->withHeader('Accept', 'application/json')
+                ->withHeader('Content-type', 'application/json')
+                ->withHeader('Authorization', 'Basic ' . base64_encode($this->username . ':' . $this->apiKey));
+
+            /** @var \Amp\Artax\Response $response */
+            $response = yield $this->httpClient->request($request);
+
+            $data = json_decode(yield $response->getBody(), true);
+
+            foreach ($data['records'] as $record) {
+                if (!empty($record['end_revision']['ref'])) {
+                    return $record['end_revision']['ref'];
+                }
+            }
+            throw new \Exception('Could not determine last revision reference.');
         });
-    }
-
-    private function sendCreateDeployment(string $fromRevision, string $toRevision)
-    {
-        $request = new Request(
-            sprintf(
-                'https://%s.deployhq.com/projects/%s/deployments',
-                $this->account,
-                $this->project
-            ),
-            'POST'
-        );
-
-        $payload = json_encode([
-            'deployment' => [
-                'parent_identifier' => $this->serverUuid,
-                'start_revision' => $fromRevision,
-                'end_revision' => $toRevision,
-                'mode' => 'queue',
-                'copy_config_files' => 0,
-                'email_notify' => 0,
-                'run_build_commands' => 0,
-            ]
-        ]);
-
-        $request = $request
-            ->withHeader('Accept', 'application/json')
-            ->withHeader('Content-type', 'application/json')
-            ->withHeader('Authorization', 'Basic ' . base64_encode($this->username . ':' . $this->apiKey))
-            ->withBody($payload);
-
-        /** @var \Amp\Artax\Response $response */
-        $response = yield $this->httpClient->request($request);
-
-        $data = json_decode(yield $response->getBody(), true);
-        return $data['identifier'];
     }
 
     public function viewDeploymentStatus(string $deploymentUuid)
     {
-        $self = $this;
-        return \Amp\call(function() use ($self, $deploymentUuid) {
+        return \Amp\call(function() use ($deploymentUuid) {
 
             $request = new Request(
                 sprintf(
                     'https://%s.deployhq.com/projects/%s/deployments/%s',
-                    $self->account,
-                    $self->project,
+                    $this->account,
+                    $this->project,
                     $deploymentUuid
                 ),
                 'GET'
@@ -142,13 +99,11 @@ class DeployHQAsyncDeploymentStorage implements AsyncDeploymentStorage
             $request = $request
                 ->withHeader('Accept', 'application/json')
                 ->withHeader('Content-type', 'application/json')
-                ->withHeader('Authorization', 'Basic ' . base64_encode($self->username . ':' . $self->apiKey));
+                ->withHeader('Authorization', 'Basic ' . base64_encode($this->username . ':' . $this->apiKey));
 
             /** @var \Amp\Artax\Response $response */
-            $response = yield $self->httpClient->request($request);
+            $response = yield $this->httpClient->request($request);
             $data = json_decode(yield $response->getBody(), true);
-
-            // file_put_contents(__DIR__ . '/../../log/' . microtime(true) . '.log', print_r($data, true));
 
             $progress = [
                 'preparing' => 4,
@@ -194,9 +149,39 @@ class DeployHQAsyncDeploymentStorage implements AsyncDeploymentStorage
 
     public function createDeployment(string $fromRevision, string $toRevision)
     {
-        $self = $this;
-        return \Amp\call(function() use ($self, $fromRevision, $toRevision) {
-            return $self->sendCreateDeployment($fromRevision, $toRevision);
+        return \Amp\call(function() use ($fromRevision, $toRevision) {
+            $request = new Request(
+                sprintf(
+                    'https://%s.deployhq.com/projects/%s/deployments',
+                    $this->account,
+                    $this->project
+                ),
+                'POST'
+            );
+
+            $payload = json_encode([
+                'deployment' => [
+                    'parent_identifier' => $this->serverUuid,
+                    'start_revision' => $fromRevision,
+                    'end_revision' => $toRevision,
+                    'mode' => 'queue',
+                    'copy_config_files' => 0,
+                    'email_notify' => 0,
+                    'run_build_commands' => 0,
+                ]
+            ]);
+
+            $request = $request
+                ->withHeader('Accept', 'application/json')
+                ->withHeader('Content-type', 'application/json')
+                ->withHeader('Authorization', 'Basic ' . base64_encode($this->username . ':' . $this->apiKey))
+                ->withBody($payload);
+
+            /** @var \Amp\Artax\Response $response */
+            $response = yield $this->httpClient->request($request);
+
+            $data = json_decode(yield $response->getBody(), true);
+            return $data['identifier'];
         });
     }
 
@@ -214,14 +199,12 @@ class DeployHQAsyncDeploymentStorage implements AsyncDeploymentStorage
             $onFinished
         );
 
-        $self = $this;
-
-        Loop::defer(function() use ($self, $deploymentUuid, $deploymentState) {
+        Loop::defer(function() use ($deploymentUuid, $deploymentState) {
 
             $completed = false;
             while ($completed === false) {
                 /** @var DeploymentStatus $status */
-                $status = yield $self->viewDeploymentStatus($deploymentUuid);
+                $status = yield $this->viewDeploymentStatus($deploymentUuid);
 
                 if ($status->getPreparingStatus() === DeploymentStatus::STATUS_COMPLETE) {
                     $deploymentState->resolveOnPrepared();

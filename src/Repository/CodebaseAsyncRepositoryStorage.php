@@ -64,9 +64,8 @@ class CodebaseAsyncRepositoryStorage implements AsyncRepositoryStorage
 
     public function getLastCommitReference(string $branchName)
     {
-        $self = $this;
-        return \Amp\call(function() use ($self, $branchName) {
-            return $self->sendRequest($branchName);
+        return \Amp\call(function() use ($branchName) {
+            return $this->sendRequest($branchName);
         });
     }
 }

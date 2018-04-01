@@ -33,13 +33,11 @@ class AmpButton
 
     private function bind()
     {
-        $self = $this;
-
         $this->deferred = new Deferred();
 
-        $this->button->on('release', function() use ($self) {
-            $currentDeferred = $self->deferred;
-            $self->deferred = new Deferred();
+        $this->button->on('release', function() {
+            $currentDeferred = $this->deferred;
+            $this->deferred = new Deferred();
             $currentDeferred->resolve();
         });
     }

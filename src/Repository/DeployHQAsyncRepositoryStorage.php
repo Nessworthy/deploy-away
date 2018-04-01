@@ -26,18 +26,13 @@ class DeployHQAsyncRepositoryStorage implements AsyncRepositoryStorage
      * @var string
      */
     private $account;
-    /**
-     * @var string
-     */
-    private $serverUuid;
 
     public function __construct(
         Client $httpClient,
         string $account,
         string $username,
         string $apiKey,
-        string $project,
-        string $serverUuid
+        string $project
     ) {
 
         $this->httpClient = $httpClient;
@@ -45,7 +40,6 @@ class DeployHQAsyncRepositoryStorage implements AsyncRepositoryStorage
         $this->username = $username;
         $this->apiKey = $apiKey;
         $this->project = $project;
-        $this->serverUuid = $serverUuid;
     }
 
     private function sendRequest(string $branchName)
@@ -74,9 +68,8 @@ class DeployHQAsyncRepositoryStorage implements AsyncRepositoryStorage
 
     public function getLastCommitReference(string $branchName)
     {
-        $self = $this;
-        return \Amp\call(function() use ($self, $branchName) {
-            return $self->sendRequest($branchName);
+        return \Amp\call(function() use ($branchName) {
+            return $this->sendRequest($branchName);
         });
     }
 }
